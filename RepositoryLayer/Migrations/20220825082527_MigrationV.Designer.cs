@@ -10,7 +10,7 @@ using RepositoryLayer.Services;
 namespace RepositoryLayer.Migrations
 {
     [DbContext(typeof(FunDoNoteContext))]
-    [Migration("20220825072352_MigrationV")]
+    [Migration("20220825082527_MigrationV")]
     partial class MigrationV
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
