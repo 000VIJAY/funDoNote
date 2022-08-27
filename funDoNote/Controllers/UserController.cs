@@ -38,8 +38,8 @@ namespace funDoNote.Controllers
         {
             try
             {
-                this.userBL.LoginUser(loginModel);
-                return this.Ok(new { success = true, status = 200, message = $"login successful for {loginModel.Email}" });
+                string token = this.userBL.LoginUser(loginModel);
+                return this.Ok(new {Token = token, success = true, status = 200, message = $"login successful for {loginModel.Email}" });
             }
             catch (Exception ex)
             {
