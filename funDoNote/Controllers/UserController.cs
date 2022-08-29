@@ -39,7 +39,28 @@ namespace funDoNote.Controllers
             try
             {
                 string token = this.userBL.LoginUser(loginModel);
-                return this.Ok(new {Token = token, success = true, status = 200, message = $"login successful for {loginModel.Email}" });
+                if (token != null)
+                {
+                    return this.Ok(new { Token = token, success = true, status = 200, message = $"login successful for {loginModel.Email}" });
+                }
+                return this.Ok(new { Token = token, success = false, status = 404, message = $"{loginModel.Email} not found" });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [HttpPost("ForgetPassword")]
+        public IActionResult ForgetPassword(string email)
+        {
+            try
+            {
+                bool isTrue = this.userBL.ForgetPassword(email);
+                if (isTrue)
+                {
+                    return this.Ok(new {success = true, status = 200, message = $"Reset link sent to {email}" });
+                }
+                return this.Ok(new { success = false, status = 404, message = $"wrong {email}" });
             }
             catch (Exception ex)
             {
