@@ -11,7 +11,7 @@ namespace CommonLayer.User
         [RegularExpression("^[A-Z]{1}[a-z]{2,}$", ErrorMessage = "First Name Start with cap and has minimum three character")]
         public string FirstName { get; set; }
         [Required]
-        [RegularExpression("^[A-Za-z]{3,}$", ErrorMessage = "Last Name has minimum three character")]
+        [RegularExpression("^[A-Za-z]{0,}$")]
         public string LastName { get; set; }
         [Required]
         public string Email { get; set; }

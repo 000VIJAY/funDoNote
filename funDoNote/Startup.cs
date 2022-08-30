@@ -81,15 +81,23 @@ namespace funDoNote
 
             }).AddJwtBearer(options =>
             {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = false,
+                    //ValidateIssuer = true,
+                    //ValidateAudience = true,
+                    //ValidateLifetime = false,
+                    //ValidateIssuerSigningKey = true,
+                    //ValidIssuer = Configuration["Jwt:Issuer"],
+                    //ValidAudience = Configuration["Jwt:Issuer"],
+                    //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])) //Configuration["JwtToken:SecretKey"]  
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = Configuration["Jwt:Issuer"],
-                    ValidAudience = Configuration["Jwt:Issuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])) //Configuration["JwtToken:SecretKey"]  
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])), //Configuration["JwtToken:SecretKey"]  
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidIssuer = "localhost",
+                    ValidAudience = "localhost"
                 };
             });
         
@@ -122,7 +130,6 @@ namespace funDoNote
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "FunDoNote v1");
-
             });
         }
     }

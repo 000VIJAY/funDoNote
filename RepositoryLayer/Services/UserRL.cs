@@ -48,7 +48,7 @@ namespace RepositoryLayer.Services
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var tokenKey = Encoding.ASCII.GetBytes("THIS_IS_MY_KEY_TO_GENERATE_TOKEN");
+                var tokenKey = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new Claim[]
@@ -56,9 +56,7 @@ namespace RepositoryLayer.Services
                     new Claim("Email", email),
                     new Claim("UserId",userId.ToString()),
                     }),
-                    Expires
-                    = DateTime.UtcNow.AddHours(2),
-
+                    Expires = DateTime.UtcNow.AddHours(2),
                     SigningCredentials =
                     new SigningCredentials(
                     new SymmetricSecurityKey(tokenKey),
@@ -94,7 +92,7 @@ namespace RepositoryLayer.Services
             }
         }
 
-        public bool ForgetPassword(string email)
+        public bool ForgotPassword(string email)
         {
             try
             {
@@ -123,7 +121,7 @@ namespace RepositoryLayer.Services
                 funDoNoteQ.Send(message);
                 Message msg = funDoNoteQ.Receive();
                 msg.Formatter = new BinaryMessageFormatter();
-                EmailService.SendEmail(email, message.Body.ToString());
+                EmailService.SendEmail(email, message.Body.ToString(),user.FirstName);
                 funDoNoteQ.ReceiveCompleted += new ReceiveCompletedEventHandler(msmqQueue_ReceiveCompleted);
                 funDoNoteQ.BeginReceive();
                 funDoNoteQ.Close();
@@ -134,37 +132,36 @@ namespace RepositoryLayer.Services
                 throw ex;
             }
         }
-
         private void msmqQueue_ReceiveCompleted(object sender, ReceiveCompletedEventArgs e)
         {
             try
             {
                 MessageQueue queue = (MessageQueue)sender;
                 Message msg = queue.EndReceive(e.AsyncResult);
-                EmailService.SendEmail(e.Message.ToString(), GenerateToken(e.Message.ToString()));
+                EmailService.SendEmail(e.Message.ToString(), GenerateToken(e.Message.ToString()),e.Message.ToString());
                 queue.BeginReceive();
             }
-            catch(Exception ex)
+            catch (MessageQueueException ex)
             {
-                throw ex;
+                if (ex.MessageQueueErrorCode == MessageQueueErrorCode.AccessDenied)
+                {
+                    Console.WriteLine("Access is denied. " + "Queue might be a system queue.");
+                }
             }
         }
-
         private string GenerateToken(string email)
         {
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var tokenKey = Encoding.ASCII.GetBytes("THIS_IS_MY_KEY_TO_GENERATE_TOKEN");
+                var tokenKey = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
                     new Claim("Email", email)
                     }),
-                    Expires
-                    = DateTime.UtcNow.AddHours(2),
-
+                    Expires = DateTime.UtcNow.AddHours(2),
                     SigningCredentials =
                          new SigningCredentials(
                     new SymmetricSecurityKey(tokenKey),
@@ -174,6 +171,24 @@ namespace RepositoryLayer.Services
                 return tokenHandler.WriteToken(token);
             }
             catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public bool ResetPassword(string email, ResetModel resetModel)
+        {
+            try
+            {
+                var user = funDoNoteContext.Users.Where(x => x.Email == email).FirstOrDefault();
+                if (resetModel.NewPassword != resetModel.ConfirmNewPassword)
+                {
+                    return false;
+                }
+                user.Password = resetModel.NewPassword;
+                funDoNoteContext.SaveChanges();
+                return true;
+            }catch(Exception ex)
             {
                 throw ex;
             }

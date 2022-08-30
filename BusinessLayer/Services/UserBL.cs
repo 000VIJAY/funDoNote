@@ -15,11 +15,11 @@ namespace BusinessLayer.Services
             this.userRL = userRL;
         }
 
-        public bool ForgetPassword(string email)
+        public bool ForgotPassword(string email)
         {
             try
             {
-                return userRL.ForgetPassword(email);
+                return userRL.ForgotPassword(email);
             }
             catch(Exception ex)
             {
@@ -46,6 +46,17 @@ namespace BusinessLayer.Services
                 this.userRL.RegisterUser(userPostModel);
             }
             catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public bool ResetPassword(string email, ResetModel resetModel)
+        {
+           try
+            {
+                return this.userRL.ResetPassword(email, resetModel);
+            }catch(Exception ex)
             {
                 throw ex;
             }

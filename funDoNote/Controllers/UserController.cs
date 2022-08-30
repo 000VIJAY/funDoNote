@@ -1,8 +1,13 @@
 ﻿using BusinessLayer.Interfaces;
 using CommonLayer.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using RepositoryLayer.Services;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 
 namespace funDoNote.Controllers
 {
@@ -12,11 +17,13 @@ namespace funDoNote.Controllers
     {
         IUserBL userBL;
         private IConfiguration _config;
+        private FunDoNoteContext _funDoNoteContext;
 
-        public UserController(IUserBL userBL , IConfiguration config)
+        public UserController(IUserBL userBL , IConfiguration config, FunDoNoteContext funDoNoteContext)
         {
             this.userBL = userBL;
             this._config = config;
+            this._funDoNoteContext = funDoNoteContext;
         }
 
         [HttpPost("RegisterUser")]
@@ -43,24 +50,60 @@ namespace funDoNote.Controllers
                 {
                     return this.Ok(new { Token = token, success = true, status = 200, message = $"login successful for {loginModel.Email}" });
                 }
-                return this.Ok(new { Token = token, success = false, status = 404, message = $"{loginModel.Email} not found" });
+                return this.BadRequest(new { Token = token, success = false, message = "Email not found" });
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
-        [HttpPost("ForgetPassword")]
-        public IActionResult ForgetPassword(string email)
+        [HttpPost("ForgotPassword")]
+        public IActionResult ForgotPassword(string email)
         {
             try
             {
-                bool isTrue = this.userBL.ForgetPassword(email);
+                bool isTrue = this.userBL.ForgotPassword(email);
                 if (isTrue)
                 {
-                    return this.Ok(new {success = true, status = 200, message = $"Reset link sent to {email}" });
+                    return this.Ok(new {success = true, status = 200, message = $"Reset password link has been sent to {email}" });
                 }
-                return this.Ok(new { success = false, status = 404, message = $"wrong {email}" });
+                return this.BadRequest(new { success = false,message = $"Wrong email" });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Authorize]
+        [HttpPut("ResetPassword")]
+        public IActionResult ResetPassword(ResetModel resetModel)
+        {
+            try
+            {
+                if (resetModel.NewPassword != resetModel.ConfirmNewPassword)
+                {
+                    return this.BadRequest(new { success = false, message = "New Password and Confirm Password are not equal." });
+                }
+                //authorization match email from token
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
+                int UserID = Int32.Parse(userid.Value);
+                var result = _funDoNoteContext.Users.Where(u => u.UserId == UserID).FirstOrDefault();
+                string Email = result.Email.ToString();
+                bool res = this.userBL.ResetPassword(Email, resetModel);
+                if(res == false)
+                {
+                    return this.BadRequest(new { success = false, message = $"Password not updated" });
+                }
+                return this.Ok(new { success = true,status = 200, message = "Password Changed Sucessfully" });
+                ////Authorization by email
+                //var identity = User.Identity as ClaimsIdentity;
+                //if (identity != null)
+                //{
+                //    IEnumerable<Claim> claims = identity.Claims;
+                //    var email = claims.Where(p => p.Type == @"Email").FirstOrDefault()?.Value;
+                //    this.userBL.ResetPassword(email, resetModel);
+                //    return this.Ok(new { success = true, message = "Password Changed Sucessfully", email = $"{email}" });
+                //}
             }
             catch (Exception ex)
             {
