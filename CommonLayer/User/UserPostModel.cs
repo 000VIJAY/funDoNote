@@ -8,7 +8,7 @@ namespace CommonLayer.User
     public class UserPostModel
     {
         [Required]
-        [RegularExpression("^[A-Z]{1}[a-z]{2,}$", ErrorMessage = "First Name Start with cap and has minimum three character")]
+        [RegularExpression("^[A-Z]{1}[a-z]{2,}$", ErrorMessage = "First Name Start with capital letter and has minimum three character")]
         public string FirstName { get; set; }
         [Required]
         [RegularExpression("^[A-Za-z]{0,}$")]
