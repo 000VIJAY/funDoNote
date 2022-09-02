@@ -38,6 +38,7 @@ namespace RepositoryLayer.Services
                 throw ex;
             }
         }
+
         public void UpdateNote(UpdateNoteModel updateNoteModel, int UserId, int NoteId)
         {
             try
@@ -54,6 +55,24 @@ namespace RepositoryLayer.Services
                 note.Reminder = updateNoteModel.Reminder;
                 note.ModifiedDate = DateTime.Now;
                 _noteContext.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public bool DeleteNote(int UserId, int NoteId)
+        {
+            try
+            {
+                var note = _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefault();
+                if(note == null)
+                {
+                    return false;
+                }
+               _noteContext.Note.Remove(note);
+                _noteContext.SaveChanges();
+                return true;
             }
             catch(Exception ex)
             {
