@@ -101,5 +101,29 @@ namespace BusinessLayer.Services
                 throw ex;
             }
         }
+
+        public async Task<bool> PinNote(int UserId, int NoteId)
+        {
+            try
+            {
+                return await this._noteRL.PinNote(UserId, NoteId);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> TrashNote(int UserId, int NoteId)
+        {
+            try
+            {
+                return await _noteRL.TrashNote(UserId, NoteId);
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

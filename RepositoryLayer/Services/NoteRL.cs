@@ -151,17 +151,18 @@ namespace RepositoryLayer.Services
             try
             {
 
-                var note =await  _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+                var note = await _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
                 if (note == null || note.IsTrash == true)
                 {
                     return false;
                 }
+
+                if (note.IsArchieve == true)
+                {
+                    note.IsArchieve = false;
+                }
+                else { note.IsArchieve = true; }
                
-                    if(note.IsArchieve == true)
-                    {
-                        note.IsArchieve = false;
-                    }
-                    note.IsArchieve = true;
                 await _noteContext.SaveChangesAsync();
                 return  true;
             }
@@ -169,6 +170,55 @@ namespace RepositoryLayer.Services
             {
                 throw ex;
             }
+        }
+
+        public async Task<bool> PinNote(int UserId, int NoteId)
+        {
+            try
+            {
+
+                var note = await _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+                if (note == null || note.IsTrash == true)
+                {
+                    return false;
+                }
+
+                if (note.IsPin == true)
+                {
+                    note.IsPin = false;
+                }
+                else { note.IsPin = true; }
+                await _noteContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> TrashNote(int UserId, int NoteId)
+        {
+            try
+            {
+                var note = await _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+                if (note == null)
+                {
+                    return false;
+                }
+                if (note.IsTrash == true)
+                {
+                    note.IsTrash = false;
+                }
+                else { note.IsTrash = true; }
+                await _noteContext.SaveChangesAsync();
+                return true;
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+           
         }
     }
 }

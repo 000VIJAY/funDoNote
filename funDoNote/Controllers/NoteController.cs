@@ -153,7 +153,7 @@ namespace funDoNote.Controllers
             }
         }
         [Authorize]
-        [HttpGet("ArchieveNote/{NoteId}")]
+        [HttpPut("ArchieveNote/{NoteId}")]
         public async Task<IActionResult> ArchieveNote(int NoteId)
         {
             try
@@ -170,6 +170,53 @@ namespace funDoNote.Controllers
           
                 var archieve = await this._noteBL.ArchieveNote(UserID , NoteId);
                 return this.Ok(new { success = true, status = 200,message="Note archieved successfully"});
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Authorize]
+        [HttpPut("PinNote/{NoteId}")]
+        public async Task<IActionResult> PinNote(int NoteId)
+        {
+            try
+            {
+                var note = await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+                if (note == null)
+                {
+                    return this.BadRequest(new { success = false, status = 400, message = "Note doesn't exist" });
+                }
+                //Authorization match userId
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
+                int UserID = Int32.Parse(userid.Value);
+
+
+                var archieve = await this._noteBL.PinNote(UserID, NoteId);
+                return this.Ok(new { success = true, status = 200, message = "Note Pinned successfully" });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Authorize]
+        [HttpPut("TrashNote/{NoteId}")]
+        public async Task<IActionResult> TrashNote(int NoteId)
+        {
+            try
+            {
+                var note = await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+                if (note == null)
+                {
+                    return this.BadRequest(new { success = false, status = 400, message = "Note doesn't exist" });
+                }
+                //Authorization match userId
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
+                int UserID = Int32.Parse(userid.Value);
+
+                await this._noteBL.TrashNote(UserID, NoteId);
+                return this.Ok(new { success = true, status = 200, message = "Note sended to Trash successfully" });
             }
             catch (Exception ex)
             {
