@@ -14,6 +14,7 @@ namespace CommonLayer.User
         [RegularExpression("^[A-Za-z]{0,}$")]
         public string LastName { get; set; }
         [Required]
+        [RegularExpression("^[A-Za-z0-9._]+@[A-Za-z0-9]+.[a-z]{2,5}$", ErrorMessage = "Please enter proper email 'ex-Vijay78@gmail.com'")]
         public string Email { get; set; }
 
         [Required]

@@ -20,5 +20,9 @@ namespace RepositoryLayer.Interfaces
         Task<bool> ArchieveNote(int UserId, int NoteId);
         Task<bool> PinNote(int UserId, int NoteId); 
         Task<bool> TrashNote(int UserId, int NoteId);
+        Task<bool> ReminderNote(int UserId, int NoteId , DateTime reminder);
+        Task<bool> DeleteReminderNote(int UserId, int NoteId);
+        Task UpdateColor(int UserId , int NoteId , string Color);
+        public List<GetColorModel> GetAllColour(int UserId);
     }
 }
