@@ -2,12 +2,14 @@
 using CommonLayer.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RepositoryLayer.Services;
 using RepositoryLayer.Services.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace funDoNote.Controllers
 {
@@ -144,6 +146,30 @@ namespace funDoNote.Controllers
                 List<NoteResponseModel> note = new List<NoteResponseModel>();
                 note = this._noteBL.GetAllNotesUsingJoin(UserID);
                 return this.Ok(new { success = true, status = 200, noteList = note });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Authorize]
+        [HttpGet("ArchieveNote/{NoteId}")]
+        public async Task<IActionResult> ArchieveNote(int NoteId)
+        {
+            try
+            {
+                var note = await _funDoNoteContext.Note.Where(x=>x.NoteId == NoteId).FirstOrDefaultAsync();
+                if(note == null)
+                {
+                    return this.BadRequest(new { success = false, status = 400, message = "Note doesn't exist" });
+                }
+                //Authorization match userId
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
+                int UserID = Int32.Parse(userid.Value);
+
+          
+                var archieve = await this._noteBL.ArchieveNote(UserID , NoteId);
+                return this.Ok(new { success = true, status = 200,message="Note archieved successfully"});
             }
             catch (Exception ex)
             {

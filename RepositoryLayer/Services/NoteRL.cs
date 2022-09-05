@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace RepositoryLayer.Services
 {
@@ -44,18 +45,23 @@ namespace RepositoryLayer.Services
         {
             try
             {
+
                var note = _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefault();
- 
-                note.Title = updateNoteModel.Title!= "string" ? updateNoteModel.Title:note.Title;
-                note.Description = updateNoteModel.Description!= "string"?updateNoteModel.Description:note.Description;
-                note.Color = updateNoteModel.Color!="string"? updateNoteModel.Color:note.Color;
-                note.IsPin = updateNoteModel.IsPin;
-                note.IsReminder = updateNoteModel.IsReminder;
-                note.IsArchieve = updateNoteModel.IsArchieve;
-                note.IsTrash = updateNoteModel.IsArchieve;
-                note.Reminder = updateNoteModel.Reminder;
-                note.ModifiedDate = DateTime.Now;
-                _noteContext.SaveChanges();
+                if (note != null || note.IsTrash == false)
+                {
+
+                    note.Title = updateNoteModel.Title != "string" ? updateNoteModel.Title : note.Title;
+                    note.Description = updateNoteModel.Description != "string" ? updateNoteModel.Description : note.Description;
+                    note.Color = updateNoteModel.Color != "string" ? updateNoteModel.Color : note.Color;
+                    note.IsPin = updateNoteModel.IsPin;
+                    note.IsReminder = updateNoteModel.IsReminder;
+                    note.IsArchieve = updateNoteModel.IsArchieve;
+                    note.IsTrash = updateNoteModel.IsArchieve;
+                    note.Reminder = updateNoteModel.Reminder;
+                    note.ModifiedDate = DateTime.Now;
+                }
+                    _noteContext.SaveChanges();
+                
             }
             catch(Exception ex)
             {
@@ -67,11 +73,14 @@ namespace RepositoryLayer.Services
             try
             {
                 var note = _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefault();
-                if(note == null)
+                if (note != null || note.IsTrash == false)
                 {
-                    return false;
+                    if (note == null)
+                    {
+                        return false;
+                    }
+                    _noteContext.Note.Remove(note);
                 }
-               _noteContext.Note.Remove(note);
                 _noteContext.SaveChanges();
                 return true;
             }
@@ -126,12 +135,37 @@ namespace RepositoryLayer.Services
                     Color = n.Color,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
-                    Email = u.Email
-                    
+                    Email = u.Email,
+                    CreatedDate = u.CreatedDate
                 }).ToList();
 
             }
             catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> ArchieveNote(int UserId, int NoteId)
+        {
+            try
+            {
+
+                var note =await  _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+                if (note == null || note.IsTrash == true)
+                {
+                    return false;
+                }
+               
+                    if(note.IsArchieve == true)
+                    {
+                        note.IsArchieve = false;
+                    }
+                    note.IsArchieve = true;
+                await _noteContext.SaveChangesAsync();
+                return  true;
+            }
+            catch(Exception ex)
             {
                 throw ex;
             }

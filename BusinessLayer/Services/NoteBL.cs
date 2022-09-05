@@ -6,6 +6,7 @@ using RepositoryLayer.Services.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BusinessLayer.Services
 {
@@ -87,6 +88,18 @@ namespace BusinessLayer.Services
                 throw ex;
             }
           
+        }
+
+        public async Task<bool> ArchieveNote(int UserId, int NoteId)
+        {
+            try
+            {
+                return await this._noteRL.ArchieveNote(UserId, NoteId);
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

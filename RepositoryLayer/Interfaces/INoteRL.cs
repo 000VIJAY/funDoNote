@@ -4,6 +4,7 @@ using RepositoryLayer.Services.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace RepositoryLayer.Interfaces
 {
@@ -16,5 +17,6 @@ namespace RepositoryLayer.Interfaces
 
         public List<Note> GetAllNotes(int UserId);
         public List<NoteResponseModel> GetAllNotesUsingJoin(int UserId);
+        Task<bool> ArchieveNote(int UserId, int NoteId);
     }
 }
