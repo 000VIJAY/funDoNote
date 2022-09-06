@@ -80,7 +80,6 @@ namespace RepositoryLayer.Services
                 user.LastName = userPostModel.LastName;
                 user.Email = userPostModel.Email;
                 user.Password = userPostModel.Password;
-                user.ConfirmPassword = userPostModel.ConfirmPassword;
                 user.CreatedDate = DateTime.Now;
                 user.ModifiedDate = DateTime.Now;
                 funDoNoteContext.Users.Add(user);

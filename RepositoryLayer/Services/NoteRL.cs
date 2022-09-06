@@ -272,10 +272,11 @@ namespace RepositoryLayer.Services
             try
             {
                 var note = await _noteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
-                if (note != null || note.IsTrash != true)
+                if (note != null && note.IsTrash != true)
                 {
                     note.Color = Color;
                 }
+                
                 _noteContext.SaveChanges();
                
             }

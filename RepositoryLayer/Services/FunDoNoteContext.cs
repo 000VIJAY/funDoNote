@@ -13,5 +13,27 @@ namespace RepositoryLayer.Services
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Note> Note { get; set; }
+        public DbSet<Label> Labels { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+             .HasIndex(u => u.Email)
+             .IsUnique();
+
+            modelBuilder.Entity<Label>()
+            .HasKey(p => new { p.UserId, p.NoteId });
+
+            modelBuilder.Entity<Label>()
+            .HasOne(u =>u.user)
+            .WithMany()
+            .HasForeignKey(u => u.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Label>()
+            .HasOne(n => n.Note)
+            .WithMany()
+            .HasForeignKey(n => n.NoteId)
+            .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }
