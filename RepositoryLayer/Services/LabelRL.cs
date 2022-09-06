@@ -21,19 +21,19 @@ namespace RepositoryLayer.Services
             this._config = config;
         }
 
-        public void AddLabel(int UserId, int NoteId, string labelName)
+        public async Task AddLabel(int UserId, int NoteId, string labelName)
         {
             try
             {
-                var user = _funDoNoteContext.Users.Where(x => x.UserId == UserId).FirstOrDefault();
-                var note = _funDoNoteContext.Note.Where(x => x.NoteId == NoteId && x.UserId == UserId).FirstOrDefault();
+                var user =await _funDoNoteContext.Users.Where(x => x.UserId == UserId).FirstOrDefaultAsync();
+                var note = await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId && x.UserId == UserId).FirstOrDefaultAsync();
                  Label _label = new Label();
                     _label.user = user;
                 _label.Note = note;
                 _label.UserId = UserId;
                 _label.NoteId = NoteId; 
                 _label.LabelName = labelName;
-                _funDoNoteContext.Labels.Add(_label);
+                 _funDoNoteContext.Labels.Add(_label);
                 _funDoNoteContext.SaveChanges();
             }
             catch(Exception ex)
@@ -44,32 +44,32 @@ namespace RepositoryLayer.Services
 
 
 
-        public Label GetLabelsByNoteId(int UserId, int NoteId)
+        public async Task<Label> GetLabelsByNoteId(int UserId, int NoteId)
         {
             try
             {
-                var user = _funDoNoteContext.Users.Where(x => x.UserId == UserId).FirstOrDefault();
-                var note = _funDoNoteContext.Note.Where(x => x.NoteId == NoteId && x.UserId == UserId).FirstOrDefault();
-                var label = _funDoNoteContext.Labels.Where(x=> x.NoteId == NoteId).FirstOrDefault();
+                var user = await _funDoNoteContext.Users.Where(x => x.UserId == UserId).FirstOrDefaultAsync();
+                var note = await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId && x.UserId == UserId).FirstOrDefaultAsync();
+                var label = await _funDoNoteContext.Labels.Where(x=> x.NoteId == NoteId).FirstOrDefaultAsync();
 
                 if(label == null)
                 {
                     return null;
                 }
 
-                return _funDoNoteContext.Labels.Where(x => x.NoteId == NoteId).FirstOrDefault();
+                return await _funDoNoteContext.Labels.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
             }
             catch(Exception ex)
             {
                 throw ex;
             }
         }
-        public List<GetLabelModel> GetLabelByNoteIdwithJoin(int UserId, int NoteId)
+        public async Task<GetLabelModel> GetLabelByNoteIdwithJoin(int UserId, int NoteId)
         {
             try
             {
-                var label = this._funDoNoteContext.Labels.FirstOrDefault(x => x.UserId == UserId);
-                var result = (from user in _funDoNoteContext.Users
+                var label = await this._funDoNoteContext.Labels.Where(x => x.UserId == UserId).FirstOrDefaultAsync();
+                var result = await (from user in _funDoNoteContext.Users
                                    join notes in _funDoNoteContext.Note on user.UserId equals UserId //where notes.NoteId == NoteId
                                    join labels in _funDoNoteContext.Labels on notes.NoteId equals labels.NoteId
                                    where labels.NoteId == NoteId && labels.UserId == UserId 
@@ -86,7 +86,7 @@ namespace RepositoryLayer.Services
                                        Color = notes.Color,
                                        LabelName = labels.LabelName,
                                        CreatedDate = labels.user.CreatedDate
-                                   }).ToList();
+                                   }).FirstOrDefaultAsync();
                 return result;
             }
             catch(Exception ex)
@@ -99,8 +99,8 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                var label = this._funDoNoteContext.Labels.FirstOrDefault(x => x.UserId == UserId);
-                var result = (from user in _funDoNoteContext.Users
+                var label =  this._funDoNoteContext.Labels.Where(x => x.UserId == UserId).FirstOrDefault();
+                var result =  (from user in _funDoNoteContext.Users
                               join notes in _funDoNoteContext.Note on user.UserId equals UserId //where notes.NoteId == NoteId
                               join labels in _funDoNoteContext.Labels on notes.NoteId equals labels.NoteId
                               where labels.UserId == UserId
@@ -119,6 +119,24 @@ namespace RepositoryLayer.Services
                                   CreatedDate = labels.user.CreatedDate
                               }).ToList();
                 return result;
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task UpdateLabel(int UserId, int NoteId, string newLabel)
+        {
+            try
+            {
+                var user =await _funDoNoteContext.Users.Where(x => x.UserId == UserId).FirstOrDefaultAsync();
+                var label = await this._funDoNoteContext.Labels.Where(x => x.NoteId == NoteId && x.UserId == UserId).FirstOrDefaultAsync();
+                if(label.NoteId == NoteId)
+                {
+                    label.LabelName = newLabel;
+                }
+                _funDoNoteContext.SaveChanges();
             }
             catch(Exception ex)
             {
