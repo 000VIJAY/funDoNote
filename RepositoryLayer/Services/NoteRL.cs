@@ -24,7 +24,9 @@ namespace RepositoryLayer.Services
         {
             try
             {
+                var user = _noteContext.Users.Where(x=> x.UserId == UserId).FirstOrDefault();
                 Note note = new Note();
+                note.user = user;
                 note.Title = noteModel.Title;
                 note.Description = noteModel.Description;
                 note.Color = noteModel.Color;
@@ -108,6 +110,7 @@ namespace RepositoryLayer.Services
         {
             try
             {
+                var user = _noteContext.Users.Where(x => x.UserId == UserId).FirstOrDefault();
                 var note =  _noteContext.Note.Where(x => x.UserId == UserId).ToList(); //using LINQ
                 return note;
             }
