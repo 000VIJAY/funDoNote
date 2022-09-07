@@ -3,12 +3,16 @@ using CommonLayer.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using RepositoryLayer.Services;
 using RepositoryLayer.Services.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace funDoNote.Controllers
@@ -20,11 +24,15 @@ namespace funDoNote.Controllers
         private INoteBL _noteBL;
         private IConfiguration _config;
         private FunDoNoteContext _funDoNoteContext;
-        public NoteController(INoteBL noteBL, IConfiguration config, FunDoNoteContext funDoNoteContext)
+        private readonly IDistributedCache _cache;
+        private readonly IMemoryCache _memoryCache;
+        public NoteController(INoteBL noteBL, IConfiguration config, FunDoNoteContext funDoNoteContext, IDistributedCache cache, IMemoryCache memoryCache)
         {
             this._funDoNoteContext = funDoNoteContext;
             this._config = config;
             this._noteBL = noteBL;
+            this._cache = cache;
+            this._memoryCache = memoryCache;
         }
         [Authorize]
         [HttpPost("AddNote")]
@@ -304,6 +312,40 @@ namespace funDoNote.Controllers
                 List<GetColorModel> note = new List<GetColorModel>();
                 note = this._noteBL.GetAllColour(UserID);
                 return this.Ok(new { success = true, status = 200, noteList = note });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Authorize]
+        [HttpGet("GetAllNoteByJoinUsingRedis")]
+        public IActionResult GetAllNoteByJoinUsingRedis()
+        {
+            try
+            {
+                string CacheKey = "NoteList";
+                string serializeNoteList;
+                var noteList = new List<NoteResponseModel>();
+                var redisNoteList = _cache.Get(CacheKey);
+
+                if(redisNoteList != null)
+                {
+                    serializeNoteList = Encoding.UTF8.GetString(redisNoteList);
+                    noteList = JsonConvert.DeserializeObject<List<NoteResponseModel>>(serializeNoteList);
+                }
+                else
+                {
+                    var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
+                    int UserID = Int32.Parse(userid.Value);
+                    noteList = this._noteBL.GetAllNotesUsingJoin(UserID);
+                    serializeNoteList = JsonConvert.SerializeObject(noteList);
+                    redisNoteList = Encoding.UTF8.GetBytes(serializeNoteList);
+                    var option = new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(20)).SetAbsoluteExpiration(TimeSpan.FromHours(6));
+                     _cache.Set(CacheKey, redisNoteList, option);
+
+                }
+                return this.Ok(new { success = true, status = 200, noteList = noteList });
             }
             catch (Exception ex)
             {

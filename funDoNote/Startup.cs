@@ -35,6 +35,7 @@ namespace funDoNote
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddMemoryCache();
             services.AddDbContext<FunDoNoteContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("funDoNoteDB")));
             //swagger code
@@ -107,6 +108,12 @@ namespace funDoNote
             services.AddTransient<INoteBL, NoteBL>();
             services.AddTransient<ILabelRL,LabelRL>();
             services.AddTransient<ILabelBL, LabelBL>();
+            services.AddDistributedRedisCache(
+               options =>
+               {
+                   options.Configuration = "Localhost:6379";
+               }
+               );
         }
 
 

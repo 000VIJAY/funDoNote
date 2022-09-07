@@ -31,7 +31,7 @@ namespace funDoNote.Controllers
         [HttpPost("AddLabelName/{NoteId}/{labelName}")]
         public async Task<IActionResult> AddLabel(int NoteId , string labelName)
         {
-            var labelNote =  await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+            var labelNote =  await _funDoNoteContext.Labels.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
             if (labelNote == null)
             {
                 return this.BadRequest(new { success = false, status = 400, message = "Note doesn't exist so create a note to add label" });
@@ -47,7 +47,7 @@ namespace funDoNote.Controllers
         [HttpGet("GetLabelsByNoteId/{NoteId}")]
         public async  Task<IActionResult> GetLabelsByNoteId(int NoteId)
         {
-            var labelNote = await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+            var labelNote = await _funDoNoteContext.Labels.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
             if (labelNote == null)
             {
                 return this.BadRequest(new { success = false, status = 400, message = "Note doesn't exist " });
@@ -63,7 +63,7 @@ namespace funDoNote.Controllers
         [HttpGet("GetLabelByNoteIdwithJoin/{NoteId}")]
         public async Task<IActionResult> GetLabelByNoteIdwithJoin(int NoteId)
         {
-            var labelNote = await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+            var labelNote = await _funDoNoteContext.Labels.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
             if (labelNote == null)
             {
                 return this.BadRequest(new { success = false, status = 400, message = "Note doesn't exist " });
@@ -77,13 +77,13 @@ namespace funDoNote.Controllers
         }
         [Authorize]
         [HttpGet("GetLabelByUserIdWithJoin")]
-        public  IActionResult GetLabelByUserIdWithJoin()
+        public  async Task<IActionResult> GetLabelByUserIdWithJoin()
         {
             var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
             int UserID = Int32.Parse(userid.Value);
 
 
-            var labels =  this._labelBL.GetLabelByUserIdWithJoin(UserID);
+            var labels = await this._labelBL.GetLabelByUserIdWithJoin(UserID);
             return this.Ok(new { success = true, status = 200, Labels = labels });
         }
 
@@ -91,7 +91,7 @@ namespace funDoNote.Controllers
         [HttpPut("UpdateLabel/{NoteId}/{newLabel}")]
         public async Task<IActionResult> UpdateLabel(int NoteId ,string newLabel)
         {
-            var labelNote = await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+            var labelNote = await _funDoNoteContext.Labels.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
             if (labelNote == null)
             {
                 return this.BadRequest(new { success = false, status = 400, message = "Note doesn't exist " });
@@ -106,7 +106,7 @@ namespace funDoNote.Controllers
         [HttpDelete("DeleteLabel/{NoteId}")]
         public async Task<IActionResult> DeleteLabel(int NoteId)
         {
-            var labelNote = await _funDoNoteContext.Note.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
+            var labelNote = await _funDoNoteContext.Labels.Where(x => x.NoteId == NoteId).FirstOrDefaultAsync();
             if (labelNote == null)
             {
                 return this.BadRequest(new { success = false, status = 400, message = "Note doesn't exist " });

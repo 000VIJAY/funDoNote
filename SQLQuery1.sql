@@ -4,3 +4,4 @@ Select * from Note
 
 use funDoNoteDB
 Select * from Users
+select * from Labels

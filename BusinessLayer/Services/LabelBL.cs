@@ -51,11 +51,11 @@ namespace BusinessLayer.Services
             }
         }
 
-        public  List<GetLabelModel> GetLabelByUserIdWithJoin(int UserId)
+        public async Task<List<GetLabelModel>> GetLabelByUserIdWithJoin(int UserId)
         {
             try
             {
-                return  this._levelRL.GetLabelByUserIdWithJoin(UserId);
+                return await this._levelRL.GetLabelByUserIdWithJoin(UserId);
             }
             catch (Exception ex)
             {

@@ -95,12 +95,12 @@ namespace RepositoryLayer.Services
             }
         }
 
-        public List<GetLabelModel> GetLabelByUserIdWithJoin(int UserId)
+        public async Task<List<GetLabelModel>> GetLabelByUserIdWithJoin(int UserId)
         {
             try
             {
                 var label =  this._funDoNoteContext.Labels.Where(x => x.UserId == UserId).FirstOrDefault();
-                var result =  (from user in _funDoNoteContext.Users
+                var result =  await (from user in _funDoNoteContext.Users
                               join notes in _funDoNoteContext.Note on user.UserId equals UserId //where notes.NoteId == NoteId
                               join labels in _funDoNoteContext.Labels on notes.NoteId equals labels.NoteId
                               where labels.UserId == UserId
@@ -117,7 +117,7 @@ namespace RepositoryLayer.Services
                                   Color = notes.Color,
                                   LabelName = labels.LabelName,
                                   CreatedDate = labels.user.CreatedDate
-                              }).ToList();
+                              }).ToListAsync();
                 return result;
             }
             catch(Exception ex)
@@ -130,9 +130,8 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                var user =await _funDoNoteContext.Users.Where(x => x.UserId == UserId).FirstOrDefaultAsync();
                 var label = await this._funDoNoteContext.Labels.Where(x => x.NoteId == NoteId && x.UserId == UserId).FirstOrDefaultAsync();
-                if(label.NoteId == NoteId)
+                if(label.NoteId == NoteId && label.Note.IsTrash == false)
                 {
                     label.LabelName = newLabel;
                 }
@@ -148,9 +147,8 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                var user = await _funDoNoteContext.Users.Where(x => x.UserId == UserId).FirstOrDefaultAsync();
                 var label = await this._funDoNoteContext.Labels.Where(x => x.NoteId == NoteId && x.UserId == UserId).FirstOrDefaultAsync();
-                if (label.NoteId == NoteId)
+                if (label.NoteId == NoteId && label.Note.IsTrash == false)
                 {
                     _funDoNoteContext.Labels.Remove(label);
                 }
