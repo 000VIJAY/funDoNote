@@ -148,10 +148,11 @@ namespace RepositoryLayer.Services
             try
             {
                 var label = await this._funDoNoteContext.Labels.Where(x => x.NoteId == NoteId && x.UserId == UserId).FirstOrDefaultAsync();
-                if (label.NoteId == NoteId && label.Note.IsTrash == false)
+                if (label.NoteId != NoteId && label.Note.IsTrash == true)
                 {
-                    _funDoNoteContext.Labels.Remove(label);
+                    return false;
                 }
+                _funDoNoteContext.Labels.Remove(label);
                 _funDoNoteContext.SaveChanges();
                 return true;
             }

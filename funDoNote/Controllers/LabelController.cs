@@ -15,7 +15,7 @@ namespace funDoNote.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class LabelController : Controller
+    public class LabelController : ControllerBase
     {
         private IConfiguration _config;
         private FunDoNoteContext _funDoNoteContext;
@@ -39,7 +39,7 @@ namespace funDoNote.Controllers
             var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
             int UserID = Int32.Parse(userid.Value);
 
-               await this._labelBL.AddLabel(UserID, NoteId, labelName);
+             await this._labelBL.AddLabel(UserID, NoteId, labelName);
             return this.Ok(new { success = true, status = 200, message = "Label added successfully" });
         }
        
@@ -114,7 +114,7 @@ namespace funDoNote.Controllers
             var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
             int UserID = Int32.Parse(userid.Value);
 
-            await this._labelBL.DeleteLabel(UserID, NoteId);
+            var res =  await this._labelBL.DeleteLabel(UserID, NoteId);
             return this.Ok(new { success = true, status = 200, message = "Label Deleted successfully" });
         }
     }

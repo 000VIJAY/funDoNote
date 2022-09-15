@@ -32,8 +32,13 @@ namespace funDoNote.Controllers
         {
             try
             {
-                this.userBL.RegisterUser(userPostModel);
-                return this.Ok(new {success = true,status = 200,message=$"Registration successful for {userPostModel.Email}"});
+                var valid = _funDoNoteContext.Users.Where(x=>x.Email == userPostModel.Email).FirstOrDefault();
+                if (valid == null)
+                {
+                    this.userBL.RegisterUser(userPostModel);
+                    return this.Ok(new {success = true,status = 200,message=$"Registration successful for {userPostModel.Email}"});
+                }
+                return this.BadRequest(new { success = false, message = $"Provided email {userPostModel.Email} already present" });
             }
             catch(Exception ex)
             {
@@ -50,14 +55,14 @@ namespace funDoNote.Controllers
                 {
                     return this.Ok(new { Token = token, success = true, status = 200, message = $"login successful for {loginModel.Email}" });
                 }
-                return this.BadRequest(new { Token = token, success = false, message = "Email not found" });
+                return this.BadRequest(new { success = false,status= 401, message = "Email not found" });
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
-        [HttpPost("ForgotPassword")]
+        [HttpPost("ForgotPassword/{email}")]
         public IActionResult ForgotPassword(string email)
         {
             try
@@ -67,7 +72,7 @@ namespace funDoNote.Controllers
                 {
                     return this.Ok(new {success = true, status = 200, message = $"Reset password link has been sent to {email}" });
                 }
-                return this.BadRequest(new { success = false,message = $"Wrong email" });
+                return this.BadRequest(new {success = false, status = 401, message = "Wrong email"});
             }
             catch (Exception ex)
             {
@@ -80,21 +85,24 @@ namespace funDoNote.Controllers
         {
             try
             {
-                if (resetModel.NewPassword != resetModel.ConfirmNewPassword)
-                {
-                    return this.BadRequest(new { success = false, message = "New Password and Confirm Password are not equal." });
-                }
                 //authorization match email from token
                 var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
                 int UserID = Int32.Parse(userid.Value);
                 var result = _funDoNoteContext.Users.Where(u => u.UserId == UserID).FirstOrDefault();
+
+                if (result.Password == resetModel.NewPassword)
+                {
+                    return this.BadRequest(new { success = false, message = "New Password and old password is same kindly give different password" });
+                }
+
                 string Email = result.Email.ToString();
                 bool res = this.userBL.ResetPassword(Email, resetModel);
                 if(res == false)
                 {
-                    return this.BadRequest(new { success = false, message = $"Password not updated" });
+                    return this.BadRequest(new { success = false,message = "New Password and Confirm Password are not same." });
                 }
                 return this.Ok(new { success = true,status = 200, message = "Password Changed Sucessfully" });
+
                 ////Authorization by email
                 //var identity = User.Identity as ClaimsIdentity;
                 //if (identity != null)
