@@ -20,6 +20,6 @@ namespace RepositoryLayer.Services.Entities
         public DateTime ModifiedDate { get; set; }
         [ForeignKey(nameof(User))]
         public int UserId { get; set; }
-        public User user { get; set; }
+        public User user {  get; set; }
     }
 }

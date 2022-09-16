@@ -28,10 +28,11 @@ namespace funDoNote.Controllers
         {
             try
             {
+                var checkEmail = _funDoNoteContext.Users.Where(x => x.Email == email).FirstOrDefault();
                 var note = _funDoNoteContext.Note.Where(x=> x.NoteId == NoteId).FirstOrDefault();
-                if (note == null)
+                if (note == null || checkEmail ==null)
                 {
-                    return BadRequest(new { success = false, message = "Note not found" });
+                    return BadRequest(new { success = false, message = "Note not found or email not exist" });
                 }
                 var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
                 var UserID = Int32.Parse(userid.Value);

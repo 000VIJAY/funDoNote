@@ -5,6 +5,7 @@ Select * from Note
 use funDoNoteDB
 Select * from Users
 select * from Labels
+select * from Collaborators
 
 use EmployeePayrollMVCDB
 Select * from EmployeesDetails;

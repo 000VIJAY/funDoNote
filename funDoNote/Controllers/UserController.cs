@@ -3,6 +3,7 @@ using CommonLayer.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RepositoryLayer.Services;
 using System;
 using System.Collections.Generic;
@@ -18,12 +19,14 @@ namespace funDoNote.Controllers
         IUserBL userBL;
         private IConfiguration _config;
         private FunDoNoteContext _funDoNoteContext;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserBL userBL , IConfiguration config, FunDoNoteContext funDoNoteContext)
+        public UserController(IUserBL userBL , IConfiguration config, FunDoNoteContext funDoNoteContext, ILogger<UserController> logger)
         {
             this.userBL = userBL;
             this._config = config;
             this._funDoNoteContext = funDoNoteContext;
+            this._logger = logger;
         }
 
         [HttpPost("RegisterUser")]
@@ -36,6 +39,7 @@ namespace funDoNote.Controllers
                 if (valid == null)
                 {
                     this.userBL.RegisterUser(userPostModel);
+                    this._logger.LogInformation("New user registered successfully with email Id:" + userPostModel.Email);
                     return this.Ok(new {success = true,status = 200,message=$"Registration successful for {userPostModel.Email}"});
                 }
                 return this.BadRequest(new { success = false, message = $"Provided email {userPostModel.Email} already present" });
@@ -53,6 +57,7 @@ namespace funDoNote.Controllers
                 string token = this.userBL.LoginUser(loginModel);
                 if (token != null)
                 {
+                    this._logger.LogInformation(" user login successfully with email Id:" + loginModel.Email);
                     return this.Ok(new { Token = token, success = true, status = 200, message = $"login successful for {loginModel.Email}" });
                 }
                 return this.BadRequest(new { success = false,status= 401, message = "Email not found" });
@@ -70,6 +75,7 @@ namespace funDoNote.Controllers
                 bool isTrue = this.userBL.ForgotPassword(email);
                 if (isTrue)
                 {
+                    this._logger.LogInformation("forget password has been sent successfully to email Id:" +email +"\n");
                     return this.Ok(new {success = true, status = 200, message = $"Reset password link has been sent to {email}" });
                 }
                 return this.BadRequest(new {success = false, status = 401, message = "Wrong email"});
@@ -101,6 +107,7 @@ namespace funDoNote.Controllers
                 {
                     return this.BadRequest(new { success = false,message = "New Password and Confirm Password are not same." });
                 }
+                this._logger.LogInformation(" password has been changed successfully");
                 return this.Ok(new { success = true,status = 200, message = "Password Changed Sucessfully" });
 
                 ////Authorization by email
